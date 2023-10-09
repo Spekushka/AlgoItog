@@ -16,7 +16,7 @@ background = transform.scale(
 fruits_sprite = {
     1 : 'Color_Apple.png',
     2 : 'Color_Pear.png',
-    3 : 'Color_Strawberry.png'
+    3 : 'Color_Strawberry.png',
 }
 font.init()
 font1 = font.Font(None, 35)
@@ -49,30 +49,46 @@ class Fruits(GameSprite):
         if self.rect.y > height:
             self.rect.x = randint(80, width-80)
             self.rect.y = 0
-Player = Player('Color_Player.png', 280, 420, 7, 80, 80)
+    def die(self):
+            self.kill()
+Player = Player('Color_Player.png', 280, 420, 10, 80, 80)
+bomb = Fruits('Color_Bomb.png', randint(65,700-65),-40,randint(1,5), 65, 65)
 fruits = sprite.Group()
-for i in range(1,5):
+for i in range(5):
     fruit_sprite = randint(1,3)
-    fruit = Fruits(fruits_sprite.get(fruit_sprite), randint(65,700-65),-40,randint(3,5),65,65)
+    fruit = Fruits(fruits_sprite.get(fruit_sprite), randint(65,700-65),-40,randint(2,5), 65, 65)
     fruit.add(fruits)
+
 
 clock = time.Clock()
 FPS = 60
 run = True
 finish = False
-
+score = 0
 speed_x = 3
 speed_y = 3
 while run:
     for e in event.get():
         if e.type == QUIT:
             run = False
-    window.blit(background, (0, 0))
-    fruits.update()
-    fruits.draw(window)
-    Player.update()
-    Player.reset()
+
+
+    if finish != True:
+        if sprite.collide_rect(Player, fruit):
+            fruit.die()
+            score += 99
+            print(score)
+        if sprite.collide_rect(Player, bomb):
+            finish = True
+        window.blit(background, (0, 0))
+        bomb.update()
+        bomb.reset()
+        fruits.update()
+        fruits.draw(window)
+        Player.update()
+        Player.reset()
     display.update()
     clock.tick(FPS)
+
 
 
