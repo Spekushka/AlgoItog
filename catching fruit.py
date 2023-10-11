@@ -1,5 +1,5 @@
 from pygame import *
-from random import randint
+from random import randint,choice
 
 win_width = 700
 win_height = 500
@@ -10,14 +10,10 @@ window = display.set_mode(
 )
 display.set_caption('Catching Fruits')
 background = transform.scale(
-    image.load('White_Background.jpg'),
+    image.load('bg.png'),
     (win_width, win_height)
 )
-fruits_sprite = {
-    1 : 'Color_Apple.png',
-    2 : 'Color_Pear.png',
-    3 : 'Color_Strawberry.png',
-}
+fruits_sprite = ['Color_Apple.png','Color_Pear.png','Color_Strawberry.png']
 font.init()
 font1 = font.Font(None, 35)
 lose1 = font1.render("ТЫ ПРОИГРАЛ!", True, (180, 0, 0))
@@ -51,13 +47,15 @@ class Fruits(GameSprite):
             self.rect.y = 0
     def die(self):
             self.kill()
-Player = Player('Color_Player.png', 280, 420, 10, 80, 80)
-bomb = Fruits('Color_Bomb.png', randint(65,700-65),-40,randint(1,5), 65, 65)
+player = Player('Color_Player.png', 280, 420, 10, 80, 80)
+bombs=sprite.Group()
+for i in range(2):
+    bomb = Fruits('Color_Bomb.png', randint(65,700-65),-40,randint(1,5), 65, 65)
+    bombs.add(bomb)
 fruits = sprite.Group()
 for i in range(5):
-    fruit_sprite = randint(1,3)
-    fruit = Fruits(fruits_sprite.get(fruit_sprite), randint(65,700-65),-40,randint(2,5), 65, 65)
-    fruit.add(fruits)
+    fruit = Fruits(choice(fruits_sprite), randint(65,700-65),-40,randint(2,5), 65, 65)
+    fruits.add(fruit)
 
 
 clock = time.Clock()
@@ -67,6 +65,12 @@ finish = False
 score = 0
 speed_x = 3
 speed_y = 3
+font.init()
+font1 = font.SysFont('Arial', 80)
+win = font1.render('YOU WIN!', True, (255, 255, 255))
+lose = font1.render('YOU LOSE!', True, (180, 0, 0))
+font2 = font.SysFont('Arial', 40)
+health = 3
 while run:
     for e in event.get():
         if e.type == QUIT:
@@ -74,21 +78,42 @@ while run:
 
 
     if finish != True:
-        if sprite.collide_rect(Player, fruit):
-            fruit.die()
-            score += 99
-            print(score)
-        if sprite.collide_rect(Player, bomb):
-            finish = True
         window.blit(background, (0, 0))
-        bomb.update()
-        bomb.reset()
+        if sprite.spritecollide(player, bombs, True):
+            health-=1
+            bomb = Fruits('Color_Bomb.png', randint(65,700-65),-40,randint(1,5), 65, 65)
+            bombs.add(bomb)
+        if health ==0:
+            finish = True
+            window.blit(lose, (200, 200))
+        if score >= 100:
+            finish = True
+            window.blit(win, (200, 200))
+        if sprite.spritecollide(player, fruits, True):
+            score += 1
+            print(score)
+            fruit = Fruits(choice(fruits_sprite), randint(65,700-65),-40,randint(2,5), 65, 65)
+            fruits.add(fruit)
+
+
+    
+
+
+
+        
+        bombs.update()
+        bombs.draw(window)
         fruits.update()
         fruits.draw(window)
-        Player.update()
-        Player.reset()
-    display.update()
-    clock.tick(FPS)
+        player.update()
+        player.reset()
 
+        text_win = font2.render('Счет:' + str(score), 1, (255, 255, 255))
+        window.blit(text_win,(5, 40))
+        text_health = font2.render('Жизни:' + str(health), 1, (255, 255, 255))
+        window.blit(text_health,(5, 90))
+  
+        clock.tick(FPS)
+    display.update()
 
 
